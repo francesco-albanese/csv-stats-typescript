@@ -1,24 +1,21 @@
-import fs from 'fs';
-
 import { dateStringToDate } from './utils';
 import { MatchResult } from './MatchResult';
 
 type MatchData = [Date, string, string, number, number, MatchResult, string];
 
-export class CsvFileReader {
-  data: MatchData[] = [];
-  
-  constructor(public filename: string) {}
+interface DataReader {
+  read(): void;
+  data: string[][];
+}
 
-  read(): void {
-    this.data = fs.readFileSync(this.filename, {
-      encoding: 'utf-8'
-    })
-    .split('\n')
-    .map((row: string): string[] => {
-      return row.split(',')
-    })
-    .map((row: string[]): MatchData => {
+export class MatchReader {
+  matches: MatchData[] = [];
+
+  constructor(public reader: DataReader) {}
+
+  load(): void {
+    this.reader.read();
+    this.matches = this.reader.data.map((row: string[]): MatchData => {
       return [
         dateStringToDate(row[0]),
         row[1],

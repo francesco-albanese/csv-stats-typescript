@@ -1,13 +1,18 @@
 import { CsvFileReader } from './CsvFileReader';
+import { MatchReader } from './MatchReader';
 import { MatchResult } from './MatchResult';
+import path from 'path';
 
-const matches = new CsvFileReader('./football.csv');
-matches.read();
+const footballCSV = path.join(__dirname, '..', 'football.csv');
 
-const manUnitedWins = matches.data.reduce((wins: number, [,homeTeam, awayTeam,,, matchOutcome]): number => {
+const csvFileReader = new CsvFileReader(footballCSV);
+const matchReader = new MatchReader(csvFileReader);
+matchReader.load();
+
+const manUnitedWins = matchReader.matches.reduce((wins: number, [,homeTeam, awayTeam,,, matchOutcome]: (Date | string | number)[]): number => {
   if (
-    (homeTeam && homeTeam.includes('Man United') && MatchResult.HomeWin === matchOutcome) ||
-    (awayTeam && awayTeam.includes('Man United') && matchOutcome === MatchResult.AwayWin)
+    (typeof homeTeam === 'string' && homeTeam.includes('Man United') && MatchResult.HomeWin === matchOutcome) ||
+    (typeof awayTeam === 'string' && awayTeam.includes('Man United') && matchOutcome === MatchResult.AwayWin)
   ) {
     wins += 1;
   }
